@@ -1,66 +1,30 @@
-
+import { USER_QUERY, XP_QUERY } from "./query.js";
+import { userSkills } from "./svg.js";
+import { graphQLRequest } from "./utils.js";
 let username;
 let password;
 const Container = document.querySelector(".container");
-async function fetchData() {
-  try {
-    const json = await fetch(
-      "https://learn.zone01oujda.ma/api/graphql-engine/v1/graphql",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query: `
-          {
-           User : event_user(
-              where: {user: {id: {_is_null: false}}, event: {path: {_eq: "/oujda/module"}}}
-              order_by: {level: asc}
-            ) {
-              level
-              userName
-              userAuditRatio
-            }
-            xp :  transaction_aggregate(
-                where: {type: {_eq: "xp"}, event: {object: {name: {_eq: "Module"}}}}
-                order_by: {createdAt: asc}
-              ) {
-                aggregate {
-                  sum {
-                    amount
-                  }
-                }
-              }
-          }`,
-        }),
-      }
-    );
-    const res = await json.json();
-    if (res.errors) {
-      console.log(111);
+const headers = document.querySelector("header");
 
-      throw new Error(d.errors.message);
-    }
-    console.log("sdsqdq", res);
-    return res.data;
-  } catch (error) {
-    console.error("Fetch error:", error);
-  }
-}
 async function home() {
-  Container.innerHTML = "";
-  const data = await fetchData();
-  for (const key in data) {
-    if (Array.isArray(data[key])) {
-      for (const k in data[key][0]) {
-        const h1 = document.createElement("h1");
-        h1.textContent = data[key][0][k];
-        Container.appendChild(h1);
-      }
-    }
-  }
+  Container.remove();
+  await DisplayUser();
+}
+
+async function DisplayUser() {
+  const userData = await graphQLRequest(USER_QUERY);
+  const skillSvg = await userSkills();
+  headers.textContent = `Welcome ${userData.user[0].userName} | Level: ${userData.user[0].level} | Audit Ratio: ${Number(userData.user[0].userAuditRatio).toFixed(2)}`;
+  const div = document.createElement("div");
+  div.classList.add("card");
+  div.innerHTML = skillSvg;
+  document.body.appendChild(div);
+  const xpData = await graphQLRequest(XP_QUERY);
+  const xp = xpData.xp.aggregate.sum.amount;
+  const xpDiv = document.createElement("div");
+  xpDiv.classList.add("xp");
+  xpDiv.textContent = `Total XP: ${xp}`;
+  document.body.appendChild(xpDiv);
 }
 
 async function ping() {
@@ -140,35 +104,3 @@ function login() {
     });
   home();
 }
-
-window.fetchData = function fetchData() {
-  fetch("https://learn.zone01oujda.ma/api/graphql-engine/v1/graphql", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearerwindow.userDetails = ;
- ${localStorage.getItem("jwt")}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query: `
-            {
-              
-            }
-`,
-    }),
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      if (data.errors) {
-        // Convert GraphQL errors into real JS error
-        throw new Error(JSON.stringify(data.errors));
-      }
-      return data.data;
-    })
-    .then((result) => {
-      console.log("==== XP Sum ====", result);
-    })
-    .catch((error) => {
-      console.error("Caught error:", error.message);
-    });
-};
