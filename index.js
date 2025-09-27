@@ -1,5 +1,6 @@
 import { USER_QUERY, XP_QUERY } from "./query.js";
-import { userSkills } from "./svg.js";
+import { userSkills } from "./svg/skill_svg.js";
+import { audit } from "./svg/audit_svg.js";
 import { graphQLRequest } from "./utils.js";
 let username;
 let password;
@@ -7,24 +8,54 @@ const Container = document.querySelector(".container");
 const headers = document.querySelector("header");
 
 async function home() {
-  Container.remove();
+  Container.className = "flex";
   await DisplayUser();
 }
 
 async function DisplayUser() {
   const userData = await graphQLRequest(USER_QUERY);
+  const totalXp = await graphQLRequest(XP_QUERY);
   const skillSvg = await userSkills();
-  headers.textContent = `Welcome ${userData.user[0].userName} | Level: ${userData.user[0].level} | Audit Ratio: ${Number(userData.user[0].userAuditRatio).toFixed(2)}`;
-  const div = document.createElement("div");
-  div.classList.add("card");
-  div.innerHTML = skillSvg;
-  document.body.appendChild(div);
-  const xpData = await graphQLRequest(XP_QUERY);
-  const xp = xpData.xp.aggregate.sum.amount;
-  const xpDiv = document.createElement("div");
-  xpDiv.classList.add("xp");
-  xpDiv.textContent = `Total XP: ${xp}`;
-  document.body.appendChild(xpDiv);
+  const auditSvg = await audit();
+
+  // Header Section
+  headers.innerHTML = `
+    <div class="header">
+      <h1>GraphQl</h1>
+      <button id="logout">Logout</button>
+    </div>
+  `;
+
+  // User Info Section
+  const userInfo = document.createElement("div");
+  userInfo.className = "aside1";
+  const userInitials = `${userData.user[0].userName[0]}${
+    userData.user[0].userName.split(" ").pop()[0]
+  }`;
+  userInfo.innerHTML = `
+    <div class="user-profile">
+      <div class="circle">${userInitials}</div>
+      <p>Full Name: ${userData.user[0].userName}</p>
+      <p>Level: ${userData.user[0].level}</p>
+      <p>Total xp: ${formatXpToBytes(totalXp.xp.aggregate.sum.amount)}</p>
+      <p>Audit ratio: ${userData.user[0].userAuditRatio}</p>
+    </div>
+  `;
+
+  // SVG Section
+  const svgSection = document.createElement("div");
+  svgSection.className = "aside2";
+  svgSection.innerHTML = skillSvg + auditSvg;
+
+  // Append to Container
+  Container.appendChild(userInfo);
+  Container.appendChild(svgSection);
+
+  // Logout functionality
+  document.getElementById("logout").addEventListener("click", () => {
+    localStorage.removeItem("jwt");
+    Display();
+  });
 }
 
 async function ping() {
@@ -103,4 +134,18 @@ function login() {
       localStorage.setItem("jwt", data);
     });
   home();
+}
+
+function formatXpToBytes(totalXp) {
+  if (totalXp < 1000) return `${totalXp}b`;
+  const units = ["b", "kb", "mb", "gb", "tb"];
+  let unitIndex = 0;
+  let formattedXp = totalXp;
+
+  while (formattedXp >= 1000 && unitIndex < units.length - 1) {
+    formattedXp /= 1000;
+    unitIndex++;
+  }
+
+  return `${formattedXp.toFixed(1)}${units[unitIndex]}`;
 }

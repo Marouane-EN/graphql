@@ -1,5 +1,5 @@
-import { SKILLS_QUERY } from "./query.js";
-import { graphQLRequest } from "./utils.js"; 
+import { SKILLS_QUERY } from "../query.js";
+import { graphQLRequest } from "../utils.js"; 
 
 /* ---------- visual constants ---------- */
 const VIEWBOX_SIZE = 400;
@@ -129,8 +129,9 @@ export async function userSkills() {
 
     // area fill path — using polygon is fine and animatable by changing "points"
     const svg = `
-      <div class="skills-card" style="width:100%;max-width:520px;margin:0 auto;">
+      <div class="skills-card">
         <svg width="100%" height="100%" viewBox="0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}" overflow="visible" aria-label="User skills">
+          
           <!-- rings -->
           ${ringsMarkup()}
 
@@ -161,6 +162,11 @@ export async function userSkills() {
           `
             )
             .join("\n")}
+
+          <!-- title -->
+          <text x="50%" y="10%" text-anchor="middle" fill="#ffffff" font-family="IBM Plex Mono" font-size="20" font-weight="bold">
+            User Skills Radar
+          </text>
         </svg>
       </div>
     `;

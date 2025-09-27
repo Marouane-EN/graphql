@@ -34,3 +34,13 @@ xp :  transaction_aggregate(
               }
           `;
 
+export const AUDITE = `
+  user {
+    success: audits_aggregate(where: { closureType: { _eq: succeeded } }) {
+      count: aggregate { count }
+    }
+    failed: audits_aggregate(where: { closureType: { _eq: failed } }) {
+      count: aggregate { count }
+    }
+  }
+`
