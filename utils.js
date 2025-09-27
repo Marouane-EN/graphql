@@ -18,8 +18,11 @@ export async function graphQLRequest(query) {
     );
     
     const res = await json.json();
+    console.log("res", res, query);
     
     if (res.errors) {
+      console.log("GraphQL errors:", res.errors);
+      
       throw new Error(res.errors.message);
     }
     

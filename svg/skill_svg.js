@@ -2,7 +2,7 @@ import { SKILLS_QUERY } from "../query.js";
 import { graphQLRequest } from "../utils.js"; 
 
 /* ---------- visual constants ---------- */
-const VIEWBOX_SIZE = 400;
+const VIEWBOX_SIZE = 500;
 const CENTER = VIEWBOX_SIZE / 2;
 const MAX_RAD = 200; // outer ring radius in your example
 const RINGS = 10; // number of concentric rings
@@ -99,6 +99,7 @@ export async function userSkills() {
   try {
     // fetch data from GraphQL using your project helper
     const res = await graphQLRequest(SKILLS_QUERY);
+    console.log("userSkills res", res);
     // `user` is an array (because user_public_view) — find the current user entry in that list
     // If multiple users returned, we pick the first one (your existing USERBOARD uses user_public_view too)
     const userEntry = (res?.user && res.user) || null;
@@ -164,7 +165,7 @@ export async function userSkills() {
             .join("\n")}
 
           <!-- title -->
-          <text x="50%" y="10%" text-anchor="middle" fill="#ffffff" font-family="IBM Plex Mono" font-size="20" font-weight="bold">
+          <text x="50%" text-anchor="middle" fill="#ffffff" font-family="IBM Plex Mono" font-size="20" font-weight="bold">
             User Skills Radar
           </text>
         </svg>

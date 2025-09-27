@@ -8,13 +8,16 @@ const Container = document.querySelector(".container");
 const headers = document.querySelector("header");
 
 async function home() {
-  Container.className = "flex";
+  Container.className = "flex hover-effect";
+  Container.innerHTML = "";
   await DisplayUser();
 }
 
 async function DisplayUser() {
   const userData = await graphQLRequest(USER_QUERY);
+  console.log("userData", userData);
   const totalXp = await graphQLRequest(XP_QUERY);
+  console.log("totalXp", totalXp);
   const skillSvg = await userSkills();
   const auditSvg = await audit();
 
@@ -29,16 +32,32 @@ async function DisplayUser() {
   // User Info Section
   const userInfo = document.createElement("div");
   userInfo.className = "aside1";
-  const userInitials = `${userData.user[0].userName[0]}${
-    userData.user[0].userName.split(" ").pop()[0]
-  }`;
   userInfo.innerHTML = `
     <div class="user-profile">
-      <div class="circle">${userInitials}</div>
-      <p>Full Name: ${userData.user[0].userName}</p>
-      <p>Level: ${userData.user[0].level}</p>
-      <p>Total xp: ${formatXpToBytes(totalXp.xp.aggregate.sum.amount)}</p>
-      <p>Audit ratio: ${userData.user[0].userAuditRatio}</p>
+      <div class="circle">
+        <img 
+          src="https://discord.zone01oujda.ma/assets/pictures/${userData.user[0].userLogin}.jpg"
+          alt="Profile"
+        />
+      </div>
+      <div class="details">
+        <div class="content">
+              <p>Full Name</p>
+              <p>${userData.user[0].userName}</p>
+        </div>
+        <div class="content">
+              <p>Level</p>
+              <p>${userData.user[0].level}</p>
+        </div>
+        <div class="content">
+              <p>Total xp</p>
+              <p>${formatXpToBytes(totalXp.xp.aggregate.sum.amount)}</p>
+        </div>
+        <div class="content">
+              <p>Audit ratio</p>
+              <p>${userData.user[0].userAuditRatio.toFixed(2)}</p>
+        </div>
+      </div>
     </div>
   `;
 
@@ -94,10 +113,12 @@ async function main() {
     Display();
     return;
   }
-  home();
+  await home();
 }
 main();
 function Display() {
+  headers.innerHTML = "";
+  Container.className = "container hover-effect";
   Container.innerHTML = `
   <h1>Login</h1>
         <div class="input">
@@ -112,8 +133,15 @@ function Display() {
         </div>
         <button type="submit" id="btn">submit</button>`;
   const btn = document.getElementById("btn");
-  console.log(btn);
+  const passwordInput = document.getElementById("password");
+  passwordInput.addEventListener("keyup", function (event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      btn.click();
+    }
+  });
 
+  
   btn.addEventListener("click", login);
 }
 
@@ -126,14 +154,15 @@ function login() {
     method: "POST",
     headers: {
       Authorization: `Basic ${credentials}`,
-      "Content-Type": "application/json",
     },
   })
-    .then((res) => res.json())
+    .then((res) => res.text())
     .then((data) => {
-      localStorage.setItem("jwt", data);
-    });
-  home();
+      const token = data.replaceAll('"', '');
+      console.log("data", token);
+
+      localStorage.setItem("jwt", token);
+    }).then(home);
 }
 
 function formatXpToBytes(totalXp) {

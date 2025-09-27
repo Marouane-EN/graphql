@@ -5,6 +5,7 @@ user : event_user(
               order_by: {level: asc}
             ) {
               level
+              userLogin
               userName
               userAuditRatio
             }`;
