@@ -1,0 +1,86 @@
+
+    <div class="main-container">
+        <main class="dashboard-section">
+           
+            
+            <div class="card fade-in">
+
+                
+                <div class="audit-progress">
+                    <div class="progress-stats">
+                        <div class="progress-stat">
+                            <span class="progress-number success">31</span>
+                            <span class="progress-label">Successful Audits</span>
+                        </div>
+                        <div class="progress-stat">
+                            <span class="progress-number error">18</span>
+                            <span class="progress-label">Failed Audits</span>
+                        </div>
+                        <div class="progress-stat">
+                            <span class="progress-number" style="color: var(--text-primary);">49</span>
+                            <span class="progress-label">Total Audits</span>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-bar-container">
+                        <div class="progress-segment success" style="width: 63.27%;">
+                            63.3% Success Rate
+                        </div>
+                        <div class="progress-segment error" style="width: 36.73%;">
+                            36.7% Failed
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add smooth animations to cards
+            const cards = document.querySelectorAll('.card, .profile-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('fade-in');
+                }, index * 100);
+            });
+
+            // Logout functionality
+            document.getElementById('logout').addEventListener('click', function() {
+                const button = this;
+                const originalText = button.innerHTML;
+                
+                button.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="m9 12 2 2 4-4"></path>
+                    </svg>
+                    Signing Out...
+                `;
+                button.disabled = true;
+                button.style.opacity = '0.7';
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    button.style.opacity = '1';
+                }, 2000);
+            });
+
+            // Add hover effects to skill points
+            const skillPoints = document.querySelectorAll('.skills-radar circle[fill="#2563eb"]');
+            skillPoints.forEach(point => {
+                point.addEventListener('mouseenter', function() {
+                    this.setAttribute('r', '6');
+                    this.style.filter = 'drop-shadow(0 0 6px #2563eb)';
+                });
+                
+                point.addEventListener('mouseleave', function() {
+                    this.setAttribute('r', '4');
+                    this.style.filter = 'none';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -5,10 +5,11 @@ import { graphQLRequest } from "./utils.js";
 let username;
 let password;
 const Container = document.querySelector(".container");
-const headers = document.querySelector("header");
+const header = document.querySelector("header");
 
 async function home() {
-  Container.className = "flex hover-effect";
+  document.body.style = ""
+  Container.className = "main-container";
   Container.innerHTML = "";
   await DisplayUser();
 }
@@ -16,55 +17,83 @@ async function home() {
 async function DisplayUser() {
   const userData = await graphQLRequest(USER_QUERY);
   console.log("userData", userData);
+  console.log("sdsdsd",userData.user[0].userName);
+  
   const totalXp = await graphQLRequest(XP_QUERY);
   console.log("totalXp", totalXp);
   const skillSvg = await userSkills();
   const auditSvg = await audit();
 
   // Header Section
-  headers.innerHTML = `
+  header.innerHTML = `
     <div class="header">
-      <h1>GraphQl</h1>
-      <button id="logout">Logout</button>
-    </div>
+            <h1>GraphQL Dashboard</h1>
+            <div class="header-actions">
+                <div class="user-menu" tabindex="0">
+                    <img src="https://discord.zone01oujda.ma/assets/pictures/${userData.user[0].userLogin}.jpg" alt="User Avatar" class="user-avatar">
+                    <div class="user-info">
+                        <span class="user-name">${userData.user[0].userName}</span>
+                        <span class="user-role">${ranks(userData.user[0].level)} developer</span>
+                    </div>
+                </div>
+                <button id="logout">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16,17 21,12 16,7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Sign Out
+                </button>
+            </div>
+        </div>
   `;
 
   // User Info Section
-  const userInfo = document.createElement("div");
-  userInfo.className = "aside1";
+  const userInfo = document.createElement("aside");
+  userInfo.className = "profile-section";
   userInfo.innerHTML = `
-    <div class="user-profile">
-      <div class="circle">
-        <img 
-          src="https://discord.zone01oujda.ma/assets/pictures/${userData.user[0].userLogin}.jpg"
-          alt="Profile"
-        />
-      </div>
-      <div class="details">
-        <div class="content">
-              <p>Full Name</p>
-              <p>${userData.user[0].userName}</p>
-        </div>
-        <div class="content">
-              <p>Level</p>
-              <p>${userData.user[0].level}</p>
-        </div>
-        <div class="content">
-              <p>Total xp</p>
-              <p>${formatXpToBytes(totalXp.xp.aggregate.sum.amount)}</p>
-        </div>
-        <div class="content">
-              <p>Audit ratio</p>
-              <p>${userData.user[0].userAuditRatio.toFixed(2)}</p>
-        </div>
-      </div>
-    </div>
+  <div class="profile-card fade-in">
+                <div class="profile-header">
+                    <img 
+                    src="https://discord.zone01oujda.ma/assets/pictures/${userData.user[0].userLogin}.jpg"
+                    alt="Profile" class="profile-image">
+                    <h2 class="profile-name">${userData.user[0].userName}</h2>
+                    <span class="profile-level">Level ${userData.user[0].level}</span>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-value">${formatXpToBytes(totalXp.xp.aggregate.sum.amount)}</span>
+                        <span class="stat-label">Total XP</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">${userData.user[0].userAuditRatio.toFixed(2)}</span>
+                        <span class="stat-label">Audit Ratio</span>
+                    </div>
+                </div>
+            </div>
   `;
 
   // SVG Section
-  const svgSection = document.createElement("div");
-  svgSection.className = "aside2";
-  svgSection.innerHTML = skillSvg + auditSvg;
+  const svgSection = document.createElement("main");
+  svgSection.className = "dashboard-section";
+  svgSection.innerHTML += `
+              <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">Skills Overview</h3>
+                    <p class="card-description">Your technical competencies across different domains</p>
+                </div>
+                ${skillSvg}
+              </div>
+              <div class="card fade-in">
+                <div class="card-header">
+                    <h3 class="card-title">Audit Performance</h3>
+                    <p class="card-description">Overview of your code review and audit activities</p>
+                </div>
+                ${auditSvg}
+              </div>
+  
+  `;
 
   // Append to Container
   Container.appendChild(userInfo);
@@ -117,22 +146,56 @@ async function main() {
 }
 main();
 function Display() {
-  headers.innerHTML = "";
-  Container.className = "container hover-effect";
+  document.body.style = `
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+  `
+  header.innerHTML = "";
+  Container.className = "login-container fade-in";
   Container.innerHTML = `
-  <h1>Login</h1>
-        <div class="input">
-            <input type="text" placeholder="username/email" name="username or email" id="username"
-                autocomplete="username" required>
-            <i class="bx bx-user"></i>
+          <div class="login-header">
+            <div class="brand">
+                <div class="brand-icon">G</div>
+                <span class="brand-text">GraphQL</span>
+            </div>
+            <h1 class="login-title">Sign In</h1>
+            <p class="login-subtitle">Access your dashboard</p>
         </div>
-        <div class="input">
-            <input type="password" placeholder="password" name="password" id="password" autocomplete="current-password"
-                required>
-            <i class='bxr  bx-lock'></i>
-        </div>
-        <button type="submit" id="btn">submit</button>`;
-  const btn = document.getElementById("btn");
+
+        <div class="login-form" id="loginForm">
+            <div class="form-group">
+                <label for="username" class="form-label">Username or Email</label>
+                <div class="input-wrapper">
+                    <input type="text" id="username" name="username" class="form-input"
+                        placeholder="Enter your username or email" autocomplete="username" required>
+                    <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" name="password" class="form-input"
+                        placeholder="Enter your password" autocomplete="current-password" required>
+                    <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-button" id="submitButton">
+                <span id="buttonText">Sign In</span>
+            </button>
+        </div>`;
+  const btn = document.getElementById("submitButton");
   const passwordInput = document.getElementById("password");
   passwordInput.addEventListener("keyup", function (event) {
     if (event.key === "Enter") {
@@ -141,7 +204,7 @@ function Display() {
     }
   });
 
-  
+
   btn.addEventListener("click", login);
 }
 
@@ -158,11 +221,17 @@ function login() {
   })
     .then((res) => res.text())
     .then((data) => {
-      const token = data.replaceAll('"', '');
-      console.log("data", token);
+      console.log("daat", data);
 
+      const token = data.replaceAll('"', '');
+      if (data.includes("error")) {
+
+        throw new Error(data.errors);
+
+      }
       localStorage.setItem("jwt", token);
-    }).then(home);
+      return home()
+    }).catch(error => console.log("fdssdfsd", error));
 }
 
 function formatXpToBytes(totalXp) {
@@ -177,4 +246,27 @@ function formatXpToBytes(totalXp) {
   }
 
   return `${formattedXp.toFixed(1)}${units[unitIndex]}`;
+}
+
+
+function ranks(level) {
+  const units = [
+    "Aspiring",
+    "Beginner",
+    "Apprentice",
+    "Assistant",
+    "Basic",
+    "Junior",
+    "Confirmed",
+    "Full-stack"
+  ];
+  if (level < 10) return `${units[0]}`;
+  let unitIndex = 0;
+
+  while (level >= 10 && unitIndex < units.length - 1) {
+    level /= 10;
+    unitIndex++;
+  }
+
+  return `${units[unitIndex]}`;
 }

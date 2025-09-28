@@ -16,16 +16,11 @@ export async function graphQLRequest(query) {
         }),
       }
     );
-    
-    const res = await json.json();
-    console.log("res", res, query);
-    
-    if (res.errors) {
-      console.log("GraphQL errors:", res.errors);
+    if (!json.ok) {
       
       throw new Error(res.errors.message);
     }
-    
+    const res = await json.json();
     return res.data;
   } catch (error) {
     console.error("Fetch error:", error);

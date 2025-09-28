@@ -68,7 +68,7 @@ function ringsMarkup() {
   let html = "";
   for (let i = 1; i <= RINGS; i++) {
     const r = (i / RINGS) * MAX_RAD;
-    html += `<circle fill="none" stroke="#AAA" stroke-width=".75" cx="${CENTER}" cy="${CENTER}" r="${r}" />\n`;
+    html += `<circle fill="none" stroke="#e2e8f0" stroke-width="1" cx="${CENTER}" cy="${CENTER}" r="${r}" />\n`;
   }
   return html;
 }
@@ -88,7 +88,7 @@ function axisDotsMarkup(axesCount) {
       const y = CENTER + Math.sin(angle) * r;
       markup += `<circle cx="${x.toFixed(2)}" cy="${y.toFixed(
         2
-      )}" fill="#AAA" r="1" />\n`;
+      )}" fill="#2563eb" r="0.9" />\n`;
     }
   }
   return markup;
@@ -142,12 +142,23 @@ export async function userSkills() {
               const angle = (Math.PI * 2 * i) / axesCount - Math.PI / 2;
               const x = (CENTER + Math.cos(angle) * MAX_RAD).toFixed(2);
               const y = (CENTER + Math.sin(angle) * MAX_RAD).toFixed(2);
-              return `<path stroke-width=".75" stroke="#AAA" d="M${CENTER} ${CENTER} L ${x} ${y}" />`;
+              return `<path stroke-width="1" stroke="#e2e8f0" d="M${CENTER} ${CENTER} L ${x} ${y}" />`;
             })
             .join("\n")}
           
+          <!-- Skills area -->
+          <defs>
+              <linearGradient id="skillsGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#2563eb;stop-opacity:0.3" />
+                  <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:0.1" />
+              </linearGradient>
+          </defs>
+
           <!-- filled polygon (skills area) -->
-          <polygon points="${poly}" fill="var(--purple)" style="transition: all .5s ease-in-out; opacity: 0.9" />
+          <polygon points="${poly}" fill="url(#skillsGradient)" 
+                                stroke="#2563eb"
+                                stroke-width="2" 
+                                style="transition: all .3s ease;" />
 
           <!-- axis dots -->
           ${axisDotsMarkup(axesCount)}
@@ -158,16 +169,12 @@ export async function userSkills() {
               (l) => `
             <text text-anchor="${l.anchor}" alignment-baseline="central"
               x="${l.x.toFixed(2)}" y="${l.y.toFixed(2)}"
-              fill="#ffffff" font-family="IBM Plex Mono" font-size="16"
+              fill="#475569" font-family="Inter, sans-serif" font-size="12" font-weight="600"
               style="pointer-events:none">${escapeHtml(l.name)}</text>
           `
             )
             .join("\n")}
 
-          <!-- title -->
-          <text x="50%" text-anchor="middle" fill="#ffffff" font-family="IBM Plex Mono" font-size="20" font-weight="bold">
-            User Skills Radar
-          </text>
         </svg>
       </div>
     `;
