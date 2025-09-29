@@ -1,5 +1,5 @@
-import { SKILLS_QUERY } from "../query.js";
-import { graphQLRequest } from "../utils.js"; 
+import { SKILLS_QUERY } from "../utils/query.js";
+import { graphQLRequest } from "../utils/utils.js"; 
 
 /* ---------- visual constants ---------- */
 const VIEWBOX_SIZE = 500;
@@ -99,11 +99,9 @@ export async function userSkills() {
   try {
     // fetch data from GraphQL using your project helper
     const res = await graphQLRequest(SKILLS_QUERY);
-    console.log("userSkills res", res);
     // `user` is an array (because user_public_view) — find the current user entry in that list
     // If multiple users returned, we pick the first one (your existing USERBOARD uses user_public_view too)
     const userEntry = (res?.user && res.user) || null;
-    console.log(userEntry);
 
     if (!userEntry) return `<div class="skills-card">No user data</div>`;
 
@@ -181,7 +179,6 @@ export async function userSkills() {
 
     return svg;
   } catch (err) {
-    console.error("userSkills failed:", err);
     return `<div class="skills-card">Failed to load skills</div>`;
   }
 }

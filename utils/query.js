@@ -45,3 +45,8 @@ export const AUDITE = `
     }
   }
 `
+export const USER_DETAILS_QUERY = `
+  user {
+    attrs
+  }
+`

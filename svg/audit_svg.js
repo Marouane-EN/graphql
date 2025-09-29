@@ -1,11 +1,10 @@
-import { AUDITE } from "../query.js";
-import { graphQLRequest } from "../utils.js";
+import { AUDITE } from "../utils/query.js";
+import { graphQLRequest } from "../utils/utils.js";
 const VIEWBOX_HEIGHT = 25;
 const VIEWBOX_WIDHT = 400;
 const PADDING = 20
 
 function calculateRectWidths(result) {
-  console.log("rere", result.success.count);
 
   const totalAudits = result.success.count + result.failed.count;
   const widthPerAudit = VIEWBOX_WIDHT / totalAudits;
@@ -47,7 +46,6 @@ function rectangule(object, result) {
 export async function audit() {
   try {
     const res = await graphQLRequest(AUDITE);
-    console.log("audit res", res);
 
     if (!res.user) return `<div>No audit data available</div>`;
 

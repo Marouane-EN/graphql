@@ -1,9 +1,17 @@
-import { USER_QUERY, XP_QUERY } from "./query.js";
+import { USER_DETAILS_QUERY, USER_QUERY, XP_QUERY } from "./utils/query.js";
 import { userSkills } from "./svg/skill_svg.js";
 import { audit } from "./svg/audit_svg.js";
-import { graphQLRequest } from "./utils.js";
+import { graphQLRequest, clearError, clearErrors, showError, formatXpToBytes, ranks, ping } from "./utils/utils.js";
 const Container = document.querySelector(".container");
 const header = document.querySelector("header");
+async function main() {
+  if (!(await ping())) {
+    Display();
+    return;
+  }
+  await home();
+}
+main();
 
 async function home() {
   document.body.style = "";
@@ -11,33 +19,21 @@ async function home() {
   Container.innerHTML = "";
   await DisplayUser();
 }
-
-async function DisplayUser() {
-  const userData = await graphQLRequest(USER_QUERY);
-  console.log("userData", userData);
-  console.log("sdsdsd", userData.user[0].userName);
-
-  const totalXp = await graphQLRequest(XP_QUERY);
-  console.log("totalXp", totalXp);
-  const skillSvg = await userSkills();
-  const auditSvg = await audit();
-
+function displayHeader(user) {
   // Header Section
   header.innerHTML = `
     <div class="header">
             <h1>GraphQL Dashboard</h1>
             <div class="header-actions">
-                <div class="user-menu" tabindex="0">
-                    <img src="https://discord.zone01oujda.ma/assets/pictures/${
-                      userData.user[0].userLogin
-                    }.jpg" alt="User Avatar" class="user-avatar">
+                <div class="user-menu" id="userMenu" tabindex="0">
+                    <img src="https://discord.zone01oujda.ma/assets/pictures/${user.userLogin
+    }.jpg" alt="User Avatar" class="user-avatar">
                     <div class="user-info">
-                        <span class="user-name">${
-                          userData.user[0].userName
-                        }</span>
+                        <span class="user-name">${user.userName
+    }</span>
                         <span class="user-role">${ranks(
-                          userData.user[0].level
-                        )} developer</span>
+      user.level
+    )} developer</span>
                     </div>
                 </div>
                 <button id="logout">
@@ -51,41 +47,89 @@ async function DisplayUser() {
             </div>
         </div>
   `;
+}
 
-  // User Info Section
+function displayUserInfo(user, totalXp) {
+  // User Info Section  
   const userInfo = document.createElement("aside");
   userInfo.className = "profile-section";
   userInfo.innerHTML = `
   <div class="profile-card fade-in">
                 <div class="profile-header">
                     <img 
-                    src="https://discord.zone01oujda.ma/assets/pictures/${
-                      userData.user[0].userLogin
-                    }.jpg"
+                    src="https://discord.zone01oujda.ma/assets/pictures/${user.userLogin}.jpg"
                     alt="Profile" class="profile-image">
-                    <h2 class="profile-name">${userData.user[0].userName}</h2>
-                    <span class="profile-level">Level ${
-                      userData.user[0].level
-                    }</span>
+                    <h2 class="profile-name">${user.userName}</h2>
+                    <span class="profile-level">Level ${user.level}</span>
                 </div>
                 
                 <div class="stats-grid">
                     <div class="stat-item">
-                        <span class="stat-value">${formatXpToBytes(
-                          totalXp.xp.aggregate.sum.amount
-                        )}</span>
+                        <span class="stat-value">${formatXpToBytes(totalXp)}</span>
                         <span class="stat-label">Total XP</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">${userData.user[0].userAuditRatio.toFixed(
-                          2
-                        )}</span>
+                        <span class="stat-value">${user.userAuditRatio.toFixed(2)}</span>
                         <span class="stat-label">Audit Ratio</span>
                     </div>
                 </div>
+  </div>
+  <!-- Profile Modal -->
+    <div class="modal-overlay" id="profileModal">
+        <div class="profile-modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Personal Information</h2>
+                <button class="modal-close" id="closeModal" aria-label="Close modal">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
             </div>
+            
+            <div class="modal-body">
+                <div class="profile-info-grid">
+                    <div class="info-item">
+                        <span class="info-label">First Name</span>
+                        <div class="info-value">${user.attrs.firstName}</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Last Name</span>
+                        <div class="info-value">${user.attrs.lastName}</div>
+                    </div>
+                    
+                    <div class="info-item highlight">
+                        <span class="info-label">Email Address</span>
+                        <div class="info-value">${user.attrs.email}</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Phone Number</span>
+                        <div class="info-value">${user.attrs.tel}</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Gender</span>
+                        <div class="info-value">${user.attrs.gender}</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">National ID (CIN)</span>
+                        <div class="info-value">${user.attrs.cin}</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">City</span>
+                        <div class="info-value">${user.attrs.addressCity}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
   `;
-
+  Container.appendChild(userInfo);
+}
+function displaySVG(skillSvg, auditSvg) {
   // SVG Section
   const svgSection = document.createElement("main");
   svgSection.className = "dashboard-section";
@@ -104,13 +148,30 @@ async function DisplayUser() {
                 </div>
                 ${auditSvg}
               </div>
-  
   `;
-
-  // Append to Container
-  Container.appendChild(userInfo);
   Container.appendChild(svgSection);
+}
+async function DisplayUser() {
+  const userData = await graphQLRequest(USER_QUERY);
+  const totalXp = await graphQLRequest(XP_QUERY);
+  const userDetails = await graphQLRequest(USER_DETAILS_QUERY)
+  const skillSvg = await userSkills();
+  const auditSvg = await audit();
+  userData.user[0].attrs = userDetails.user[0].attrs
+  displayHeader(userData.user[0])
+  displayUserInfo(userData.user[0], totalXp.xp.aggregate.sum.amount)
+  displaySVG(skillSvg, auditSvg)
 
+  const profileModal = document.getElementById("profileModal")
+
+  document.getElementById("userMenu").addEventListener("click", () => {
+    profileModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  })
+  document.getElementById("closeModal").addEventListener("click", () => {
+    profileModal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+  })
   // Logout functionality
   document.getElementById("logout").addEventListener("click", () => {
     localStorage.removeItem("jwt");
@@ -118,45 +179,7 @@ async function DisplayUser() {
   });
 }
 
-async function ping() {
-  try {
-    const respons = await fetch(
-      "https://learn.zone01oujda.ma/api/graphql-engine/v1/graphql",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("jwt")}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query: `
-              query {
-                user {
-                  id
-                }
-              }
-    `,
-        }),
-      }
-    );
-    const res = await respons.json();
-    console.log("res", res);
-    if (res.errors) {
-      throw new Error("error");
-    }
-    return true;
-  } catch (error) {
-    return false;
-  }
-}
-async function main() {
-  if (!(await ping())) {
-    Display();
-    return;
-  }
-  await home();
-}
-main();
+
 function Display() {
   document.body.style = `
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -177,7 +200,7 @@ function Display() {
             <h1 class="login-title">Sign In</h1>
             <p class="login-subtitle">Access your dashboard</p>
         </div>
-
+      <form id="submit">
         <div class="login-form" id="loginForm">
             <div class="form-group">
                 <label for="username" class="form-label">Username or Email</label>
@@ -206,14 +229,19 @@ function Display() {
             <button type="submit" class="submit-button" id="submitButton">
                 <span id="buttonText">Sign In</span>
             </button>
-        </div>`;
+        </div>
+      </form>
+        `;
+  eventListeners()
+}
+function eventListeners() {
   const usernameInput = document.getElementById("username");
   const passwordInput = document.getElementById("password");
-  const btn = document.getElementById("submitButton");
+  const form = document.getElementById("submit");
   passwordInput.addEventListener("keyup", function (event) {
     if (event.key === "Enter") {
       event.preventDefault();
-      btn.click();
+      form.click();
     }
   });
   // Real-time validation
@@ -234,8 +262,12 @@ function Display() {
   });
   usernameInput.addEventListener("input", () => clearError(usernameInput));
   passwordInput.addEventListener("input", () => clearError(passwordInput));
-  btn.addEventListener("click", login);
+  form.addEventListener("submit", (e) => {
+    e.preventDefault()
+    login()
+  });
 }
+
 
 function login() {
   clearErrors();
@@ -243,7 +275,6 @@ function login() {
   const passwordInput = document.getElementById("password");
   const username = usernameInput.value;
   const password = passwordInput.value;
-  console.log(username, password);
 
   const credentials = btoa(`${username}:${password}`);
 
@@ -255,10 +286,7 @@ function login() {
   })
     .then((res) => res.json())
     .then((data) => {
-
       if (data.error) {
-        console.log(data.error);
-        
         throw new Error(data.error);
       }
       localStorage.setItem("jwt", data);
@@ -270,78 +298,4 @@ function login() {
         error
       )
     );
-}
-
-function formatXpToBytes(totalXp) {
-  if (totalXp < 1000) return `${totalXp}b`;
-  const units = ["b", "kb", "mb", "gb", "tb"];
-  let unitIndex = 0;
-  let formattedXp = totalXp;
-
-  while (formattedXp >= 1000 && unitIndex < units.length - 1) {
-    formattedXp /= 1000;
-    unitIndex++;
-  }
-
-  return `${formattedXp.toFixed(1)}${units[unitIndex]}`;
-}
-
-function ranks(level) {
-  const units = [
-    "Aspiring",
-    "Beginner",
-    "Apprentice",
-    "Assistant",
-    "Basic",
-    "Junior",
-    "Confirmed",
-    "Full-stack",
-  ];
-  if (level < 10) return `${units[0]}`;
-  let unitIndex = 0;
-
-  while (level >= 10 && unitIndex < units.length - 1) {
-    level /= 10;
-    unitIndex++;
-  }
-
-  return `${units[unitIndex]}`;
-}
-
-// Helper functions
-function showError(input, message) {
-  input.classList.add("error");
-
-  // Remove existing error message
-  const existingError =
-    input.parentNode.parentNode.querySelector(".error-message");
-  if (existingError) {
-    existingError.remove();
-  }
-
-  // Add new error message
-  const errorDiv = document.createElement("div");
-  errorDiv.className = "error-message";
-  errorDiv.innerHTML = `
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                    </svg>
-                    ${message}
-                `;
-  input.parentNode.parentNode.appendChild(errorDiv);
-}
-
-function clearError(input) {
-  input.classList.remove("error");
-  const errorMessage =
-    input.parentNode.parentNode.querySelector(".error-message");
-  if (errorMessage) {
-    errorMessage.remove();
-  }
-}
-
-function clearErrors() {
-  document.querySelectorAll(".form-input").forEach((input) => {
-    clearError(input);
-  });
 }
