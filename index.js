@@ -2,13 +2,11 @@ import { USER_QUERY, XP_QUERY } from "./query.js";
 import { userSkills } from "./svg/skill_svg.js";
 import { audit } from "./svg/audit_svg.js";
 import { graphQLRequest } from "./utils.js";
-let username;
-let password;
 const Container = document.querySelector(".container");
 const header = document.querySelector("header");
 
 async function home() {
-  document.body.style = ""
+  document.body.style = "";
   Container.className = "main-container";
   Container.innerHTML = "";
   await DisplayUser();
@@ -17,8 +15,8 @@ async function home() {
 async function DisplayUser() {
   const userData = await graphQLRequest(USER_QUERY);
   console.log("userData", userData);
-  console.log("sdsdsd",userData.user[0].userName);
-  
+  console.log("sdsdsd", userData.user[0].userName);
+
   const totalXp = await graphQLRequest(XP_QUERY);
   console.log("totalXp", totalXp);
   const skillSvg = await userSkills();
@@ -30,10 +28,16 @@ async function DisplayUser() {
             <h1>GraphQL Dashboard</h1>
             <div class="header-actions">
                 <div class="user-menu" tabindex="0">
-                    <img src="https://discord.zone01oujda.ma/assets/pictures/${userData.user[0].userLogin}.jpg" alt="User Avatar" class="user-avatar">
+                    <img src="https://discord.zone01oujda.ma/assets/pictures/${
+                      userData.user[0].userLogin
+                    }.jpg" alt="User Avatar" class="user-avatar">
                     <div class="user-info">
-                        <span class="user-name">${userData.user[0].userName}</span>
-                        <span class="user-role">${ranks(userData.user[0].level)} developer</span>
+                        <span class="user-name">${
+                          userData.user[0].userName
+                        }</span>
+                        <span class="user-role">${ranks(
+                          userData.user[0].level
+                        )} developer</span>
                     </div>
                 </div>
                 <button id="logout">
@@ -55,19 +59,27 @@ async function DisplayUser() {
   <div class="profile-card fade-in">
                 <div class="profile-header">
                     <img 
-                    src="https://discord.zone01oujda.ma/assets/pictures/${userData.user[0].userLogin}.jpg"
+                    src="https://discord.zone01oujda.ma/assets/pictures/${
+                      userData.user[0].userLogin
+                    }.jpg"
                     alt="Profile" class="profile-image">
                     <h2 class="profile-name">${userData.user[0].userName}</h2>
-                    <span class="profile-level">Level ${userData.user[0].level}</span>
+                    <span class="profile-level">Level ${
+                      userData.user[0].level
+                    }</span>
                 </div>
                 
                 <div class="stats-grid">
                     <div class="stat-item">
-                        <span class="stat-value">${formatXpToBytes(totalXp.xp.aggregate.sum.amount)}</span>
+                        <span class="stat-value">${formatXpToBytes(
+                          totalXp.xp.aggregate.sum.amount
+                        )}</span>
                         <span class="stat-label">Total XP</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value">${userData.user[0].userAuditRatio.toFixed(2)}</span>
+                        <span class="stat-value">${userData.user[0].userAuditRatio.toFixed(
+                          2
+                        )}</span>
                         <span class="stat-label">Audit Ratio</span>
                     </div>
                 </div>
@@ -153,7 +165,7 @@ function Display() {
             align-items: center;
             justify-content: center;
             padding: 1rem;
-  `
+  `;
   header.innerHTML = "";
   Container.className = "login-container fade-in";
   Container.innerHTML = `
@@ -195,22 +207,44 @@ function Display() {
                 <span id="buttonText">Sign In</span>
             </button>
         </div>`;
-  const btn = document.getElementById("submitButton");
+  const usernameInput = document.getElementById("username");
   const passwordInput = document.getElementById("password");
+  const btn = document.getElementById("submitButton");
   passwordInput.addEventListener("keyup", function (event) {
     if (event.key === "Enter") {
       event.preventDefault();
       btn.click();
     }
   });
+  // Real-time validation
+  usernameInput.addEventListener("blur", function () {
+    if (!this.value.trim()) {
+      showError(this, "Username or email is required");
+    } else {
+      clearError(this);
+    }
+  });
 
-
+  passwordInput.addEventListener("blur", function () {
+    if (!this.value.trim()) {
+      showError(this, "Password is required");
+    } else {
+      clearError(this);
+    }
+  });
+  usernameInput.addEventListener("input", () => clearError(usernameInput));
+  passwordInput.addEventListener("input", () => clearError(passwordInput));
   btn.addEventListener("click", login);
 }
 
 function login() {
-  username = document.getElementById("username").value;
-  password = document.getElementById("password").value;
+  clearErrors();
+  const usernameInput = document.getElementById("username");
+  const passwordInput = document.getElementById("password");
+  const username = usernameInput.value;
+  const password = passwordInput.value;
+  console.log(username, password);
+
   const credentials = btoa(`${username}:${password}`);
 
   fetch("https://learn.zone01oujda.ma/api/auth/signin", {
@@ -219,19 +253,23 @@ function login() {
       Authorization: `Basic ${credentials}`,
     },
   })
-    .then((res) => res.text())
+    .then((res) => res.json())
     .then((data) => {
-      console.log("daat", data);
 
-      const token = data.replaceAll('"', '');
-      if (data.includes("error")) {
-
-        throw new Error(data.errors);
-
+      if (data.error) {
+        console.log(data.error);
+        
+        throw new Error(data.error);
       }
-      localStorage.setItem("jwt", token);
-      return home()
-    }).catch(error => console.log("fdssdfsd", error));
+      localStorage.setItem("jwt", data);
+      return home();
+    })
+    .catch((error) =>
+      showError(
+        passwordInput,
+        error
+      )
+    );
 }
 
 function formatXpToBytes(totalXp) {
@@ -248,7 +286,6 @@ function formatXpToBytes(totalXp) {
   return `${formattedXp.toFixed(1)}${units[unitIndex]}`;
 }
 
-
 function ranks(level) {
   const units = [
     "Aspiring",
@@ -258,7 +295,7 @@ function ranks(level) {
     "Basic",
     "Junior",
     "Confirmed",
-    "Full-stack"
+    "Full-stack",
   ];
   if (level < 10) return `${units[0]}`;
   let unitIndex = 0;
@@ -269,4 +306,42 @@ function ranks(level) {
   }
 
   return `${units[unitIndex]}`;
+}
+
+// Helper functions
+function showError(input, message) {
+  input.classList.add("error");
+
+  // Remove existing error message
+  const existingError =
+    input.parentNode.parentNode.querySelector(".error-message");
+  if (existingError) {
+    existingError.remove();
+  }
+
+  // Add new error message
+  const errorDiv = document.createElement("div");
+  errorDiv.className = "error-message";
+  errorDiv.innerHTML = `
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                    ${message}
+                `;
+  input.parentNode.parentNode.appendChild(errorDiv);
+}
+
+function clearError(input) {
+  input.classList.remove("error");
+  const errorMessage =
+    input.parentNode.parentNode.querySelector(".error-message");
+  if (errorMessage) {
+    errorMessage.remove();
+  }
+}
+
+function clearErrors() {
+  document.querySelectorAll(".form-input").forEach((input) => {
+    clearError(input);
+  });
 }
