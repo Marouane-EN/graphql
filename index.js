@@ -27,13 +27,10 @@ function displayHeader(user) {
             <div class="header-actions">
                 <div class="user-menu" id="userMenu" tabindex="0">
                     <img src="https://discord.zone01oujda.ma/assets/pictures/${user.userLogin
-    }.jpg" alt="User Avatar" class="user-avatar">
+                    }.jpg" alt="User Avatar" class="user-avatar">
                     <div class="user-info">
-                        <span class="user-name">${user.userName
-    }</span>
-                        <span class="user-role">${ranks(
-      user.level
-    )} developer</span>
+                        <span class="user-name">${user.userName}</span>
+                        <span class="user-role">${ranks(user.level)} developer</span>
                     </div>
                 </div>
                 <button id="logout">
@@ -84,8 +81,17 @@ function displayUserInfo(user, totalXp) {
                         <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </button>
+            </div><br>
+
+            <div class="profile-header">
+                    <img 
+                    src="https://discord.zone01oujda.ma/assets/pictures/${user.userLogin}.jpg"
+                    alt="Profile" class="profile-image">
+                    <div class="user-info">
+                        <span class="info-value">${ranks(user.level)} developer</span>
+                    </div>
             </div>
-            
+
             <div class="modal-body">
                 <div class="profile-info-grid">
                     <div class="info-item">

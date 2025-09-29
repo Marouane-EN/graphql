@@ -168,7 +168,7 @@ export async function userSkills() {
             <text text-anchor="${l.anchor}" alignment-baseline="central"
               x="${l.x.toFixed(2)}" y="${l.y.toFixed(2)}"
               fill="#475569" font-family="Inter, sans-serif" font-size="12" font-weight="600"
-              style="pointer-events:none">${escapeHtml(l.name)}</text>
+              style="pointer-events:none">${l.name}</text>
           `
             )
             .join("\n")}
@@ -181,14 +181,4 @@ export async function userSkills() {
   } catch (err) {
     return `<div class="skills-card">Failed to load skills</div>`;
   }
-}
-
-/* small helper to avoid XSS when inserting label text (we assume skill names are simple but safe) */
-function escapeHtml(s = "") {
-  return String(s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
 }
