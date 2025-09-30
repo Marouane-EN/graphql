@@ -405,6 +405,7 @@ body {
     flex-direction: column;
     gap: 1rem;
   }
+  
 }
 
 /* Loading states and micro-interactions */

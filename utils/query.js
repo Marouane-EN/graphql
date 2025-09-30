@@ -1,4 +1,4 @@
-export const USER_QUERY = `
+export const EVENT_USER_QUERY = `
 user : event_user(
               where: {user: {id: {_is_null: false}}, 
               event: {path: {_eq: "/oujda/module"}}}
@@ -10,7 +10,7 @@ user : event_user(
               userAuditRatio
             }`;
 
-export const SKILLS_QUERY = `
+export const DISTINCT_SKILLS_QUERY = `
   user:   transaction(
     where: { type:{ _like: "skill_%" } }
     distinct_on: type
@@ -22,7 +22,7 @@ export const SKILLS_QUERY = `
   
 `;
 
-export const XP_QUERY = `
+export const XP_AGGREGATE_QUERY = `
 xp :  transaction_aggregate(
                 where: {type: {_eq: "xp"}, event: {object: {name: {_eq: "Module"}}}}
                 order_by: {createdAt: asc}
@@ -35,7 +35,7 @@ xp :  transaction_aggregate(
               }
           `;
 
-export const AUDITE = `
+export const AUDIT_AGGREGATE_QUERY = `
   user {
     success: audits_aggregate(where: { closureType: { _eq: succeeded } }) {
       count: aggregate { count }
@@ -44,9 +44,9 @@ export const AUDITE = `
       count: aggregate { count }
     }
   }
-`
-export const USER_DETAILS_QUERY = `
+`;
+export const USER_ATTRS_QUERY = `
   user {
     attrs
   }
-`
+`;

@@ -1,5 +1,5 @@
-import { SKILLS_QUERY } from "../utils/query.js";
-import { graphQLRequest } from "../utils/utils.js"; 
+import { DISTINCT_SKILLS_QUERY } from "../utils/query.js";
+import { graphqlRequest } from "../utils/utils.js";
 
 /* ---------- visual constants ---------- */
 const VIEWBOX_SIZE = 500;
@@ -98,7 +98,7 @@ function axisDotsMarkup(axesCount) {
 export async function userSkills() {
   try {
     // fetch data from GraphQL using your project helper
-    const res = await graphQLRequest(SKILLS_QUERY);
+    const res = await graphqlRequest(DISTINCT_SKILLS_QUERY);
     // `user` is an array (because user_public_view) — find the current user entry in that list
     // If multiple users returned, we pick the first one (your existing USERBOARD uses user_public_view too)
     const userEntry = (res?.user && res.user) || null;
