@@ -110,7 +110,7 @@ function renderUserProfile(user, totalXp) {
         <div class="profile-header">
           <img src="https://discord.zone01oujda.ma/assets/pictures/${user.userLogin}.jpg"
                alt="Profile" class="profile-image">
-          <div class="user-info">
+          <div class="info-item">
             <span class="info-value">${ranks(user.level)} developer</span>
           </div>
         </div>
