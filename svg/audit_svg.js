@@ -51,12 +51,12 @@ function rectangule(object, result) {
         key === "failedRectWidth" ? VIEWBOX_WIDHT + PADDING * 2 : x
       }" y="${
       VIEWBOX_HEIGHT / 2 + 3
-    }" text-anchor="${textAnchor}" fill="#475569" font-family="Inter, sans-serif" font-size="20" font-weight="200">
+    }" text-anchor="${textAnchor}" fill="#475569" font-family="Inter, sans-serif" font-size="14" font-weight="200">
         ${count}
       </text>
       <text x="${x + PADDING + 30}" y="${
       VIEWBOX_HEIGHT + PADDING - 8
-    }" text-anchor="middle" fill="${color}" font-family="Inter, sans-serif" font-size="20" font-weight="200">
+    }" text-anchor="middle" fill="${color}" font-family="Inter, sans-serif" font-size="14" font-weight="200">
         ${label}
       </text>
     `;
