@@ -28,7 +28,8 @@ export async function graphqlRequest(query) {
 
     return res.data;
   } catch (error) {
-    console.error("Fetch error:", error);
+    document.body.innerHTML = "no data found"
+    return false
   }
 }
 
@@ -105,11 +106,12 @@ export function ranks(level) {
   ];
 
   if (level < 10) return `${units[0]}`;
-  let unitIndex = 0;
-
+  let unitIndex = 0;  
   // Divide by 10 for every rank until reaching max
   while (level >= 10 && unitIndex < units.length - 1) {
-    level /= 10;
+    level -= 10;
+    console.log(unitIndex < units.length - 1);
+    
     unitIndex++;
   }
 

@@ -168,7 +168,9 @@ async function displayDashboard() {
   const userEventResult = await graphqlRequest(EVENT_USER_QUERY);
   const xpAggregate = await graphqlRequest(XP_AGGREGATE_QUERY);
   const userAttrsResult = await graphqlRequest(USER_ATTRS_QUERY);
-
+  if (!userEventResult || !xpAggregate || !userAttrsResult) {
+    return
+  }
   // Fetch SVG visualizations
   const skillsSvg = await userSkills();
   const auditSvgMarkup = await audit();
